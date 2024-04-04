@@ -46,3 +46,12 @@ def display_time():
     latest_dictionary_entry = reactive_calc_combined()
     return f"{latest_dictionary_entry['timestamp']}"
 icon_svg("moon")
+
+
+with ui.layout_columns():
+    with ui.card():
+        ui.card_header("Current Data (placeholder only)")
+
+with ui.layout_columns():
+    with ui.card():
+        ui.card_header("Current Chart (placeholder only)")
