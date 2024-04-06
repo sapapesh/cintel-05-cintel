@@ -7,6 +7,9 @@ from collections import deque
 
 from faicons import icon_svg
 import pandas as pd
+import plotly.express as px
+from shinywidgets import render_plotly
+from scipy import stats
 
 UPDATE_INTERVAL_SECS: int = 1
 
@@ -41,7 +44,7 @@ with ui.sidebar(open="open"):
 
     ui.a(
         "GitHub Source",
-        href="https://https://github.com/sapapesh/cintel-05-cintel/tree/main",
+        href="https://https://github.com/sapapesh/cintel-05-cintel",
         target="_blank",
     )
 
@@ -61,13 +64,53 @@ with ui.layout_columns():
 
         "still too cold"
 
-with ui.layout_columns():
-    with ui.value_box(
-        showcase=icon_svg("moon"),
-        theme="bg-gradient-green-yellow",
-    ):
-        
-        "Current Date and Time"
+    with ui.card(full_screen=True):
+        ui.card_header("Current Date and Time")
+    
+        @render.text
+        def display_time():
+            """Get the latest reading and return a timestamp string"""
+            deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+            return f"{latest_dictionary_entry['timestamp']}"
+
+#with ui.card(full_screen=True, min_height="40%"):
+with ui.card(full_screen=True):
+    ui.card_header("Most Recent Readings")
+
+    @render.data_frame
+    def display_df():
+        """Get the latest reading and return a dataframe with current readings"""
+        deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+        pd.set_option('display.width', None)        # Use maximum width
+        return render.DataGrid( df,width="100%")
+
+with ui.card():
+    ui.card_header("Chart with Current Trend")
+
+    @render_plotly
+    def display_plot():
+        deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+        if not df.empty:
+           df["timestamp"] = pd.to_datetime(df["timestamp"]) 
+
+        fig = px.scatter(df,
+            x="timestamp",
+            y="temp",
+            title="Temperature Readings with Regression Line",
+            labels={"temp": "Temperature (°C)", "timestamp": "Time"},
+            color_discrete_sequence=["blue"] )
+
+        sequence = range(len(df))
+        x_vals = list(sequence)
+        y_vals = df["temp"]
+
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x_vals, y_vals)
+        df['best_fit_line'] = [slope * x + intercept for x in x_vals]
+
+        fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
+        fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)")
+
+        return fig
         
         
         @render.text
@@ -76,14 +119,3 @@ with ui.layout_columns():
             deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
             return f"{latest_dictionary_entry['timestamp']}"
 
-ui.hr()
-
-
-
-with ui.layout_columns():
-    with ui.card():
-        ui.card_header("Current Data (placeholder only)")
-
-with ui.layout_columns():
-    with ui.card():
-        ui.card_header("Current Chart (placeholder only)")
