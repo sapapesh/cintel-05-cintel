@@ -3,49 +3,76 @@ from shiny.express import ui
 
 import random
 from datetime import datetime
+from collections import deque
 
 from faicons import icon_svg
+import pandas as pd
 
 UPDATE_INTERVAL_SECS: int = 1
+
+DEQUE_SIZE: int = 5
+reactive_value_wrapper = reactive.value(deque(maxlen=DEQUE_SIZE))
 
 @reactive.calc()
 def reactive_calc_combined():
     reactive.invalidate_later(UPDATE_INTERVAL_SECS)
     temp = round(random.uniform(-20, -15), 2)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    latest_dictionary_entry = {"temp": temp, "timestamp": timestamp}
-    return latest_dictionary_entry
+    new_dictionary_entry = {"temp": temp, "timestamp": timestamp}
+    reactive_value_wrapper.get().append(new_dictionary_entry)
+    deque_snapshot = reactive_value_wrapper.get()
+    df = pd.DataFrame(deque_snapshot)
+    latest_dictionary_entry = new_dictionary_entry
+    return deque_snapshot, df, latest_dictionary_entry
 
-ui.page_opts(title="PyShiny Express: Live Data (Basic)", fillable=True)
+ui.page_opts(title="Sarah's Antartic Data: Live Data (Basic)", fillable=True)
 
 with ui.sidebar(open="open"):
     ui.h2("Antarctic Explorer", class_="text-center")
+    icon_svg("cube")
     ui.p(
         "A demonstration of real-time temperature readings in Antarctica.",
         class_="text-center",
     )
 
-ui.h2("Current Antartic Temp")
-@render.text
-def display_temp():
-    """Get the latest reading and return a temperature string"""
-    latest_dictionary_entry = reactive_calc_combined()
-    return f"{latest_dictionary_entry['temp']} C"
+    ui.hr()
 
-ui.p("still too cold")
+    ui.h6("Links:")
 
-icon_svg("sun")
+    ui.a(
+        "GitHub Source",
+        href="https://https://github.com/sapapesh/cintel-05-cintel/tree/main",
+        target="_blank",
+    )
+
+with ui.layout_columns():
+    with ui.value_box(
+        showcase=icon_svg("sun"),
+        theme="bg-gradient-blue-purple",
+    ):
+    
+        "Current Temperature"
+    
+        @render.text
+        def display_temp():
+            """Get the latest reading and return a temperature string"""
+            deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+            return f"{latest_dictionary_entry['temp']} C"
+
+        "still too cold"
+
+    with ui.card(full_screen=True):
+        ui.card_header("Current Date and Time")
+        icon_svg("moon")
+        
+        @render.text
+        def display_time():
+            """Get the latest reading and return a timestamp string"""
+            deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
+            return f"{latest_dictionary_entry['timestamp']}"
 
 ui.hr()
 
-ui.h2("Current Date and Time")
-
-@render.text
-def display_time():
-    """Get the latest reading and return a timestamp string"""
-    latest_dictionary_entry = reactive_calc_combined()
-    return f"{latest_dictionary_entry['timestamp']}"
-icon_svg("moon")
 
 
 with ui.layout_columns():
