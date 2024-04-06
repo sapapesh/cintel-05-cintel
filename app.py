@@ -11,6 +11,9 @@ import plotly.express as px
 from shinywidgets import render_plotly
 from scipy import stats
 
+
+ui.input_dark_mode(id="Dark", mode="dark")
+
 UPDATE_INTERVAL_SECS: int = 1
 
 DEQUE_SIZE: int = 5
@@ -66,6 +69,8 @@ with ui.layout_columns():
 
     with ui.card(full_screen=True):
         ui.card_header("Current Date and Time")
+        
+
     
         @render.text
         def display_time():
@@ -109,7 +114,7 @@ with ui.card():
 
         fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
         fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)")
-
+        fig.update_layout(font_color="black")
         return fig
         
         
@@ -118,4 +123,3 @@ with ui.card():
             """Get the latest reading and return a timestamp string"""
             deque_snapshot, df, latest_dictionary_entry = reactive_calc_combined()
             return f"{latest_dictionary_entry['timestamp']}"
-
