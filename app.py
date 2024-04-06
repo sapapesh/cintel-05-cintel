@@ -61,9 +61,14 @@ with ui.layout_columns():
 
         "still too cold"
 
-    with ui.card(full_screen=True):
-        ui.card_header("Current Date and Time")
-        icon_svg("moon")
+with ui.layout_columns():
+    with ui.value_box(
+        showcase=icon_svg("moon"),
+        theme="bg-gradient-green-yellow",
+    ):
+        
+        "Current Date and Time"
+        
         
         @render.text
         def display_time():
