@@ -22,7 +22,7 @@ reactive_value_wrapper = reactive.value(deque(maxlen=DEQUE_SIZE))
 @reactive.calc()
 def reactive_calc_combined():
     reactive.invalidate_later(UPDATE_INTERVAL_SECS)
-    temp = round(random.uniform(-20, -15), 2)
+    temp = round(random.uniform(-20, -10), 2)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_dictionary_entry = {"temp": temp, "timestamp": timestamp}
     reactive_value_wrapper.get().append(new_dictionary_entry)
@@ -88,7 +88,7 @@ with ui.card(full_screen=True):
         return render.DataGrid( df,width="100%")
 
 with ui.card():
-    ui.card_header("Chart with Current Trend")
+    ui.card_header("Chart with Current Trend", style="background-color: lightgray; width: 100%,")
 
     @render_plotly
     def display_plot():
@@ -111,7 +111,7 @@ with ui.card():
         df['best_fit_line'] = [slope * x + intercept for x in x_vals]
 
         fig.add_scatter(x=df["timestamp"], y=df['best_fit_line'], mode='lines', name='Regression Line')
-        fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)")
+        fig.update_layout(xaxis_title="Time",yaxis_title="Temperature (°C)", yaxis_range=[-20,-10])
         fig.update_layout(font_color="black")
         return fig
         
