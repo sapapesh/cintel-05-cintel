@@ -33,7 +33,7 @@ def reactive_calc_combined():
 
 ui.page_opts(title="Sarah's Antartic Data: Live Data (Basic)", fillable=True)
 
-with ui.sidebar(open="open"):
+with ui.sidebar(open="open", style="background-color: green; font-family: 'Comic Sans MS', cursive;"):
     ui.h2("Antarctic Explorer", class_="text-center")
     icon_svg("cube")
     ui.p(
@@ -68,10 +68,8 @@ with ui.layout_columns():
         "still too cold"
 
     with ui.card(full_screen=True):
-        ui.card_header("Current Date and Time")
+        ui.card_header("Current Date and Time", style="background-color: yellow; color: black",)
         
-
-    
         @render.text
         def display_time():
             """Get the latest reading and return a timestamp string"""
